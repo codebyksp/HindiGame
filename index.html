@@ -6,15 +6,17 @@
   <style>
     body {
       background-color: #ffe4e1;
-      font-family: "Courier New", monospace;
-      color: #333;
       margin: 0;
       padding: 20px;
+      font-family: "Courier New", monospace;
+      color: #333;
     }
+
     #container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
     }
+
     #title {
       background-color: #fffaf0;
       text-align: center;
@@ -23,18 +25,45 @@
       color: #8B0000;
       padding: 10px;
       margin-bottom: 20px;
+      /* If you prefer letter-spacing instead of manual &nbsp;:
+         letter-spacing: 5px;
+      */
     }
+
+    /* The main wrapper uses flex to position the two panes side by side */
+    #mainWrapper {
+      display: flex;
+      gap: 20px;          /* space between left and right panes */
+      align-items: flex-start;
+    }
+
+    /* Left pane grows to fill available space */
+    #leftPane {
+      flex: 1;
+    }
+
+    /* Right pane can have a fixed or flexible width */
+    #rightPane {
+      width: 300px;       /* adjust as desired */
+      text-align: center; /* center the GIF if you like */
+    }
+
+    /* The scrolling text area */
     #content {
       background-color: #f8f8ff;
       padding: 20px;
-      height: 400px;
+      height: 350px;
       overflow-y: auto;
       border: 1px solid #ccc;
       white-space: pre-wrap;
+      margin-bottom: 20px;
     }
+
+    /* Input area styling */
     #inputArea {
-      margin-top: 20px;
+      margin-bottom: 20px;
     }
+
     #userInput {
       width: 70%;
       padding: 10px;
@@ -42,6 +71,7 @@
       border: 1px solid #ccc;
       font-size: 16px;
     }
+
     #submitButton {
       padding: 10px 20px;
       background-color: #faebd7;
@@ -49,44 +79,60 @@
       font-size: 16px;
       cursor: pointer;
     }
-    #gifArea {
-      margin-top: 20px;
-      text-align: center;
-    }
-    #gifArea img {
+
+    /* GIF styling */
+    #gifImage {
       max-width: 100%;
       height: auto;
       opacity: 1;
       transition: opacity 1s ease-in-out;
     }
+
+    /* Tag classes for typed printing */
     .challenge { color: #FFA000; font-weight: bold; }
-    .correct { color: green; font-weight: bold; }
-    .wrong { color: red; font-weight: bold; }
-    .skip { color: #888; font-style: italic; }
+    .correct   { color: green;   font-weight: bold; }
+    .wrong     { color: red;     font-weight: bold; }
+    .skip      { color: #888;    font-style: italic; }
   </style>
 </head>
 <body>
   <div id="container">
-    <div id="title">B O L L Y W O O D  E S C A P E  R O O M</div>
-    <div id="content"></div>
-    <div id="inputArea">
-      <input type="text" id="userInput" placeholder="Enter your answer">
-      <button id="submitButton">Submit</button>
+    <!-- Title with extra spacing -->
+    <div id="title">
+      B&nbsp;&nbsp;O&nbsp;&nbsp;L&nbsp;&nbsp;L&nbsp;&nbsp;Y&nbsp;&nbsp;W&nbsp;&nbsp;O&nbsp;&nbsp;O&nbsp;&nbsp;D
+      &nbsp;&nbsp;&nbsp;&nbsp;E&nbsp;&nbsp;S&nbsp;&nbsp;C&nbsp;&nbsp;A&nbsp;&nbsp;P&nbsp;&nbsp;E
+      &nbsp;&nbsp;&nbsp;&nbsp;R&nbsp;&nbsp;O&nbsp;&nbsp;O&nbsp;&nbsp;M
     </div>
-    <div id="gifArea">
-      <img id="gifImage" src="" alt="GIF will appear here">
+
+    <!-- Main wrapper for side-by-side layout -->
+    <div id="mainWrapper">
+      <!-- Left pane: the content area and input -->
+      <div id="leftPane">
+        <div id="content"></div>
+        <div id="inputArea">
+          <input type="text" id="userInput" placeholder="Enter your answer">
+          <button id="submitButton">Submit</button>
+        </div>
+      </div>
+
+      <!-- Right pane: the GIF -->
+      <div id="rightPane">
+        <img id="gifImage" src="" alt="GIF will appear here">
+      </div>
     </div>
   </div>
 
   <script>
-    // Global state
+    // -------------------------------------------
+    // TYPED PRINT & GAME FLOW LOGIC
+    // -------------------------------------------
     let currentQuestion = null;
     const contentDiv = document.getElementById('content');
     const userInput = document.getElementById('userInput');
     const submitButton = document.getElementById('submitButton');
     const gifImage = document.getElementById('gifImage');
 
-    // Logo text (ASCII art)
+    // ASCII art logo
     const logo = ` ____________________________
 |                            |
 |   B O L L Y   W O O D      |
@@ -96,7 +142,7 @@
     \\   | CLAP! |   /
      \\  '-------'  /`;
 
-    // Utility function for typed printing
+    // Utility: typed printing (character-by-character)
     function typedPrint(text, className = null, speed = 20, callback = null, index = 0) {
       if (index < text.length) {
         const span = document.createElement('span');
@@ -119,8 +165,8 @@
         if (finalCallback) finalCallback();
         return;
       }
-      let message = messages.shift();
-      let className = classes.shift() || null;
+      const message = messages.shift();
+      const className = classes.shift() || null;
       typedPrint(message, className, speed, () => {
         typedPrintSequence(messages, classes, speed, finalCallback);
       });
@@ -146,7 +192,21 @@
       }
     });
 
-    // Game flow functions
+    // Cross-fade function for GIF
+    function crossFadeToNewGif(newGifSrc, fadeDuration, steps) {
+      gifImage.style.transition = `opacity ${fadeDuration}ms`;
+      // Fade out
+      gifImage.style.opacity = 0;
+      setTimeout(() => {
+        gifImage.src = newGifSrc;
+        // Fade in
+        gifImage.style.opacity = 1;
+      }, fadeDuration);
+    }
+
+    // -------------------------------------------
+    // GAME FLOW
+    // -------------------------------------------
     function showIntro() {
       const messages = [
         logo,
@@ -183,7 +243,7 @@
         "a. karti   b. karte   c. karta   d. karten",
         "Enter your answer (or type 'skip'):"
       ];
-      typedPrintSequence([...messages], ["challenge", null, null, null], 20, null);
+      typedPrintSequence([...messages], ["challenge", null, null, null], 20);
       currentQuestion = question1;
     }
 
@@ -195,7 +255,8 @@
           });
           return;
         }
-        if (["i have mother", "i have a mother", "i have mom", "i have a mom"].includes(answer.toLowerCase().trim())) {
+        const accepted = ["i have mother", "i have a mother", "i have mom", "i have a mom"];
+        if (accepted.includes(answer.toLowerCase())) {
           const messages = [
             "Correct! Iconic line from Deewar!",
             "Also, remember when Sabeena Ji mentioned not to use 'pass' with possession for people?",
@@ -244,7 +305,7 @@
         "Clue: A story of three engineering students and their friendship.",
         "Enter your guess (or type 'skip'):"
       ];
-      typedPrintSequence([...messages], ["challenge", null, null], 20, null);
+      typedPrintSequence([...messages], ["challenge", null, null], 20);
       currentQuestion = question3;
     }
 
@@ -256,11 +317,13 @@
           });
           return;
         }
-        const accepted = ["hello, how are you", "hi, how are you", "hey, how are you",
-                          "hello how are you", "hi how are you", "hey how are you",
-                          "hello, how are you?", "hi, how are you?", "hey, how are you?",
-                          "hello how are you?", "hi how are you?", "hey how are you?"];
-        if (accepted.includes(answer.toLowerCase().trim())) {
+        const accepted = [
+          "hello, how are you", "hi, how are you", "hey, how are you",
+          "hello how are you", "hi how are you", "hey how are you",
+          "hello, how are you?", "hi, how are you?", "hey, how are you?",
+          "hello how are you?", "hi how are you?", "hey how are you?"
+        ];
+        if (accepted.includes(answer.toLowerCase())) {
           typedPrint("Correct! Well done.\n", "correct", 20, () => {
             setTimeout(question5, 500);
           });
@@ -275,7 +338,7 @@
         "नमस्ते, आप कैसे हैं?",
         "Enter your translation (or type 'skip'):"
       ];
-      typedPrintSequence([...messages], ["challenge", null, null], 20, null);
+      typedPrintSequence([...messages], ["challenge", null, null], 20);
       currentQuestion = question4;
     }
 
@@ -287,7 +350,7 @@
           });
           return;
         }
-        // Check if answer contains "दोस्त" or "dost"
+        // Accept "दोस्त" or "dost"
         if (answer.includes("दोस्त") || answer.toLowerCase().includes("dost")) {
           typedPrint("Correct! 'दोस्त' means 'friend'.\n", "correct", 20, () => {
             setTimeout(question6, 500);
@@ -302,7 +365,7 @@
         "Challenge 5: Fill in the blank: The Hindi word for 'friend' is ______.",
         "Enter your answer (or type 'skip'):"
       ];
-      typedPrintSequence([...messages], ["challenge", null], 20, null);
+      typedPrintSequence([...messages], ["challenge", null], 20);
       currentQuestion = question5;
     }
 
@@ -314,6 +377,7 @@
           });
           return;
         }
+        // Accept "किताबें" or "kitaben"
         if (answer.includes("किताबें") || answer.toLowerCase().includes("kitaben")) {
           typedPrint("Correct! 'किताबें' is the plural form of 'किताब'.\n", "correct", 20, () => {
             setTimeout(endGame, 500);
@@ -328,7 +392,7 @@
         "Challenge 6: What is the plural form of 'किताब' (book) in Hindi?",
         "Enter your answer (or type 'skip'):"
       ];
-      typedPrintSequence([...messages], ["challenge", null], 20, null);
+      typedPrintSequence([...messages], ["challenge", null], 20);
       currentQuestion = question6;
     }
 
@@ -341,18 +405,6 @@
         crossFadeToNewGif('static/best.gif', 800, 20);
       });
       currentQuestion = null;
-    }
-
-    // Simple cross-fade function using CSS opacity transition
-    function crossFadeToNewGif(newGifSrc, fadeDuration, steps) {
-      gifImage.style.transition = `opacity ${fadeDuration}ms`;
-      // Fade out
-      gifImage.style.opacity = 0;
-      setTimeout(() => {
-        gifImage.src = newGifSrc;
-        // Fade in
-        gifImage.style.opacity = 1;
-      }, fadeDuration);
     }
 
     // Start the game
