@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bollywood Escape Room</title>
+  <style>
+    body {
+      background-color: #ffe4e1;
+      font-family: "Courier New", monospace;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    #container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    #title {
+      background-color: #fffaf0;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #8B0000;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+    #content {
+      background-color: #f8f8ff;
+      padding: 20px;
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+    #inputArea {
+      margin-top: 20px;
+    }
+    #userInput {
+      width: 70%;
+      padding: 10px;
+      background-color: #faf0e6;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    #submitButton {
+      padding: 10px 20px;
+      background-color: #faebd7;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #gifArea {
+      margin-top: 20px;
+      text-align: center;
+    }
+    #gifArea img {
+      max-width: 100%;
+      height: auto;
+      opacity: 1;
+      transition: opacity 1s ease-in-out;
+    }
+    .challenge { color: #FFA000; font-weight: bold; }
+    .correct { color: green; font-weight: bold; }
+    .wrong { color: red; font-weight: bold; }
+    .skip { color: #888; font-style: italic; }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="title">B O L L Y W O O D  E S C A P E  R O O M</div>
+    <div id="content"></div>
+    <div id="inputArea">
+      <input type="text" id="userInput" placeholder="Enter your answer">
+      <button id="submitButton">Submit</button>
+    </div>
+    <div id="gifArea">
+      <img id="gifImage" src="" alt="GIF will appear here">
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let currentQuestion = null;
+    const contentDiv = document.getElementById('content');
+    const userInput = document.getElementById('userInput');
+    const submitButton = document.getElementById('submitButton');
+    const gifImage = document.getElementById('gifImage');
+
+    // Logo text (ASCII art)
+    const logo = ` ____________________________
+|                            |
+|   B O L L Y   W O O D      |
+|       ESCAPE ROOM          |
+|____________________________|
+   \\    .-------.    /
+    \\   | CLAP! |   /
+     \\  '-------'  /`;
+
+    // Utility function for typed printing
+    function typedPrint(text, className = null, speed = 20, callback = null, index = 0) {
+      if (index < text.length) {
+        const span = document.createElement('span');
+        if (className) span.className = className;
+        span.textContent = text[index];
+        contentDiv.appendChild(span);
+        contentDiv.scrollTop = contentDiv.scrollHeight;
+        setTimeout(() => {
+          typedPrint(text, className, speed, callback, index + 1);
+        }, speed);
+      } else {
+        contentDiv.appendChild(document.createElement('br'));
+        if (callback) callback();
+      }
+    }
+
+    // Print a sequence of messages
+    function typedPrintSequence(messages, classes = [], speed = 20, finalCallback = null) {
+      if (messages.length === 0) {
+        if (finalCallback) finalCallback();
+        return;
+      }
+      let message = messages.shift();
+      let className = classes.shift() || null;
+      typedPrint(message, className, speed, () => {
+        typedPrintSequence(messages, classes, speed, finalCallback);
+      });
+    }
+
+    // Clear user input
+    function clearInput() {
+      userInput.value = "";
+    }
+
+    // Handle submit button and Enter key
+    function handleSubmit() {
+      if (currentQuestion) {
+        let answer = userInput.value.trim();
+        clearInput();
+        currentQuestion(answer);
+      }
+    }
+    submitButton.addEventListener('click', handleSubmit);
+    userInput.addEventListener('keyup', function(event) {
+      if (event.key === 'Enter') {
+        handleSubmit();
+      }
+    });
+
+    // Game flow functions
+    function showIntro() {
+      const messages = [
+        logo,
+        "Welcome to the Bollywood Escape Room!",
+        "You find yourself trapped in a mysterious Bollywood studio.",
+        "To escape, you must solve Hindi grammar and vocabulary challenges!",
+        "Are you ready? Let's begin!\n"
+      ];
+      typedPrintSequence([...messages], Array(messages.length).fill(null), 15, () => {
+        setTimeout(question1, 1000);
+      });
+    }
+
+    function question1(answer) {
+      if (answer !== undefined) {
+        if (answer.toLowerCase() === "skip") {
+          typedPrint("No worries! Let's move to the next challenge.\n", "skip", 20, () => {
+            setTimeout(question2, 500);
+          });
+          return;
+        } else if (answer.toLowerCase() === "c") {
+          typedPrint("Correct! Let's move to the next challenge.\n", "correct", 20, () => {
+            setTimeout(question2, 500);
+          });
+          return;
+        } else {
+          typedPrint("Wrong answer! Try again.\n", "wrong", 20);
+          return;
+        }
+      }
+      const messages = [
+        "Challenge 1: Fill in the blank with the correct Hindi verb!",
+        "Aamir Khan bollywood filmon mein kaam ____ hai.",
+        "a. karti   b. karte   c. karta   d. karten",
+        "Enter your answer (or type 'skip'):"
+      ];
+      typedPrintSequence([...messages], ["challenge", null, null, null], 20, null);
+      currentQuestion = question1;
+    }
+
+    function question2(answer) {
+      if (answer !== undefined) {
+        if (answer.toLowerCase() === "skip") {
+          typedPrint("No worries! Let's move to the next challenge.\n", "skip", 20, () => {
+            setTimeout(question3, 500);
+          });
+          return;
+        }
+        if (["i have mother", "i have a mother", "i have mom", "i have a mom"].includes(answer.toLowerCase().trim())) {
+          const messages = [
+            "Correct! Iconic line from Deewar!",
+            "Also, remember when Sabeena Ji mentioned not to use 'pass' with possession for people?",
+            "She illustrated this with this example.\n"
+          ];
+          typedPrintSequence([...messages], ["correct", null, null], 20, () => {
+            setTimeout(question3, 500);
+          });
+          return;
+        } else {
+          typedPrint("Not quite! Try again.\n", "wrong", 20);
+          return;
+        }
+      }
+      const messages = [
+        "Challenge 2: Translate this Bollywood dialogue into English!",
+        "\"Mere paas maa hai.\"",
+        "Enter your translation (or type 'skip'):"
+      ];
+      typedPrintSequence([...messages], ["challenge", null, null], 20, () => {
+        crossFadeToNewGif('static/deewar.gif', 800, 20);
+      });
+      currentQuestion = question2;
+    }
+
+    function question3(answer) {
+      if (answer !== undefined) {
+        if (answer.toLowerCase() === "skip") {
+          typedPrint("No worries! Let's move on.\n", "skip", 20, () => {
+            setTimeout(question4, 500);
+          });
+          return;
+        } else if (answer.toLowerCase().includes("3 idiots")) {
+          typedPrint("Correct! You're doing great!\n", "correct", 20, () => {
+            crossFadeToNewGif('static/3idiots.gif', 800, 20);
+            setTimeout(question4, 3000);
+          });
+          return;
+        } else {
+          typedPrint("Oops! Try again.\n", "wrong", 20);
+          return;
+        }
+      }
+      const messages = [
+        "Challenge 3: Guess the Bollywood movie from this clue!",
+        "Clue: A story of three engineering students and their friendship.",
+        "Enter your guess (or type 'skip'):"
+      ];
+      typedPrintSequence([...messages], ["challenge", null, null], 20, null);
+      currentQuestion = question3;
+    }
+
+    function question4(answer) {
+      if (answer !== undefined) {
+        if (answer.toLowerCase() === "skip") {
+          typedPrint("No worries! Moving on.\n", "skip", 20, () => {
+            setTimeout(question5, 500);
+          });
+          return;
+        }
+        const accepted = ["hello, how are you", "hi, how are you", "hey, how are you",
+                          "hello how are you", "hi how are you", "hey how are you",
+                          "hello, how are you?", "hi, how are you?", "hey, how are you?",
+                          "hello how are you?", "hi how are you?", "hey how are you?"];
+        if (accepted.includes(answer.toLowerCase().trim())) {
+          typedPrint("Correct! Well done.\n", "correct", 20, () => {
+            setTimeout(question5, 500);
+          });
+          return;
+        } else {
+          typedPrint("Not quite! Try again.\n", "wrong", 20);
+          return;
+        }
+      }
+      const messages = [
+        "Challenge 4: Translate the following Devanagari sentence into English:",
+        "नमस्ते, आप कैसे हैं?",
+        "Enter your translation (or type 'skip'):"
+      ];
+      typedPrintSequence([...messages], ["challenge", null, null], 20, null);
+      currentQuestion = question4;
+    }
+
+    function question5(answer) {
+      if (answer !== undefined) {
+        if (answer.toLowerCase() === "skip") {
+          typedPrint("No worries! Moving on.\n", "skip", 20, () => {
+            setTimeout(question6, 500);
+          });
+          return;
+        }
+        // Check if answer contains "दोस्त" or "dost"
+        if (answer.includes("दोस्त") || answer.toLowerCase().includes("dost")) {
+          typedPrint("Correct! 'दोस्त' means 'friend'.\n", "correct", 20, () => {
+            setTimeout(question6, 500);
+          });
+          return;
+        } else {
+          typedPrint("Not quite! Try again.\n", "wrong", 20);
+          return;
+        }
+      }
+      const messages = [
+        "Challenge 5: Fill in the blank: The Hindi word for 'friend' is ______.",
+        "Enter your answer (or type 'skip'):"
+      ];
+      typedPrintSequence([...messages], ["challenge", null], 20, null);
+      currentQuestion = question5;
+    }
+
+    function question6(answer) {
+      if (answer !== undefined) {
+        if (answer.toLowerCase() === "skip") {
+          typedPrint("No worries! Moving on.\n", "skip", 20, () => {
+            setTimeout(endGame, 500);
+          });
+          return;
+        }
+        if (answer.includes("किताबें") || answer.toLowerCase().includes("kitaben")) {
+          typedPrint("Correct! 'किताबें' is the plural form of 'किताब'.\n", "correct", 20, () => {
+            setTimeout(endGame, 500);
+          });
+          return;
+        } else {
+          typedPrint("Oops! Try again.\n", "wrong", 20);
+          return;
+        }
+      }
+      const messages = [
+        "Challenge 6: What is the plural form of 'किताब' (book) in Hindi?",
+        "Enter your answer (or type 'skip'):"
+      ];
+      typedPrintSequence([...messages], ["challenge", null], 20, null);
+      currentQuestion = question6;
+    }
+
+    function endGame() {
+      const messages = [
+        "Congratulations! You've escaped the Bollywood studio!",
+        "You truly are a Bollywood and Hindi grammar master! 🎉"
+      ];
+      typedPrintSequence([...messages], [null, null], 20, () => {
+        crossFadeToNewGif('static/best.gif', 800, 20);
+      });
+      currentQuestion = null;
+    }
+
+    // Simple cross-fade function using CSS opacity transition
+    function crossFadeToNewGif(newGifSrc, fadeDuration, steps) {
+      gifImage.style.transition = `opacity ${fadeDuration}ms`;
+      // Fade out
+      gifImage.style.opacity = 0;
+      setTimeout(() => {
+        gifImage.src = newGifSrc;
+        // Fade in
+        gifImage.style.opacity = 1;
+      }, fadeDuration);
+    }
+
+    // Start the game
+    showIntro();
+  </script>
+</body>
+</html>
