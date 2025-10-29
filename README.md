@@ -3,7 +3,7 @@
 A very basic creative project made for fun as part of a Hindi language course. The goal was to practice both **Hindi vocabulary and grammar** while also experimenting with **HTML, CSS, and JavaScript**.
 
 This was made quickly and is intentionally simple—just a playful way to merge language learning with coding practice.
-https://codebyksp.github.io/HindiGame/
+Check it out here: https://codebyksp.github.io/HindiGame/
 
 ## About the Game
 
