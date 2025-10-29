@@ -28,7 +28,7 @@ https://codebyksp.github.io/HindiGame/
 * The GIF transition uses a simple **cross-fade** implemented with CSS opacity and JavaScript timing.
 * There’s no backend—everything runs client-side in the browser.
 
-## Future Improvements
+## Future Improvements (if I ever revisit)
 
 * Add more levels or randomized challenges.
 * Store player progress locally using `localStorage`.
